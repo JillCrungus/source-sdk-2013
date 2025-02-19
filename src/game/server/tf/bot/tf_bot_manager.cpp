@@ -258,7 +258,7 @@ void CTFBotManager::OnCreepKilled( CTFPlayer *killer )
 
 	++m_creepExperience[ killer->GetTeamNumber() ];
 
-/*
+
 	int xp = m_creepExperience[ killer->GetTeamNumber() ];
 	int level = xp / tf_creep_level_up.GetInt();
 	int left = xp % tf_creep_level_up.GetInt();
@@ -270,9 +270,9 @@ void CTFBotManager::OnCreepKilled( CTFPlayer *killer )
 				level+1, left, tf_creep_level_up.GetInt() );
 
 	UTIL_ClientPrintAll( HUD_PRINTTALK, text );
-*/
 
-	UTIL_ClientPrintAll( HUD_PRINTTALK, "%s killed a creep" );
+
+	//UTIL_ClientPrintAll( HUD_PRINTTALK, "%s killed a creep" );
 }
 
 #endif // TF_CREEP_MODE

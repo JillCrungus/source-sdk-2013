@@ -60,7 +60,7 @@ ActionResult< CTFBot >	CTFBotCreepWave::OnStart( CTFBot *me, Action< CTFBot > *p
 	me->StopLookingAroundForEnemies();
 	m_stuckTimer.Invalidate();
 	
-	me->GetPlayerClass()->SetCustomModel( "models/bots/bot_heavy.mdl", USE_CLASS_ANIMATIONS );
+	me->GetPlayerClass()->SetCustomModel( "models/bots/heavy/bot_heavy.mdl", USE_CLASS_ANIMATIONS );
 	me->UpdateModel();
 
 	return Continue();
