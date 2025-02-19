@@ -229,8 +229,22 @@ void CRaidLogic::Reset( void )
 	m_miniBossIndex = 0;
 }
 
+CTFBot* SpawnRedTFBot(int botClass, const Vector& spot)
+{
+	CTFBot* bot = NextBotCreatePlayerBot< CTFBot >("Bot");
 
-#if 0
+	if (!bot)
+		return nullptr;
+
+	//bot->SetAttribute(CTFBot::IS_NPC);
+	bot->HandleCommand_JoinTeam("red");
+	bot->SetDifficulty(CTFBot::NORMAL);
+	bot->HandleCommand_JoinClass(g_aRawPlayerClassNamesShort[botClass]);
+	bot->SetPosition(spot);
+	return bot;
+}
+
+#if 1
 //--------------------------------------------------------------------------------------------------------
 bool SpawnWanderer( const Vector &spot )
 {
@@ -334,7 +348,7 @@ void CRaidLogic::OnRoundStart( void )
 		area->SetWanderCount( 0 );
 	}
 
-#if 0
+#if 1
 	//----------------------------------------------
 	// fill the world with wandering defenders
 	int totalPopulation = (int)( tf_raid_wandering_density.GetFloat() * totalSpace + 0.5f );
@@ -361,7 +375,7 @@ void CRaidLogic::OnRoundStart( void )
 
 	for( int i=0; i<m_actualSentrySpotVector.Count(); ++i )
 	{
-		SpawnSentry( m_actualSentrySpotVector[i]->GetCenter() );
+		//SpawnSentry( m_actualSentrySpotVector[i]->GetCenter() );
 	}
 
 	DevMsg( "RAID: Total sentry population = %d\n", m_actualSentrySpotVector.Count() );
@@ -467,7 +481,7 @@ int CompareIncursionDistances( CTFNavArea * const *area1, CTFNavArea * const *ar
 }
 
 
-#if 0
+#if 1
 //--------------------------------------------------------------------------------------------------------
 class CPopulator : public ISearchSurroundingAreasFunctor
 {
@@ -824,7 +838,7 @@ void CRaidLogic::StartMobTimer( float duration )
 }
 
 
-#if 0
+#if 1
 //--------------------------------------------------------------------------------------------------------
 CTFNavArea *CRaidLogic::SelectMobSpawn( CUtlVector< CTFNavArea * > *spawnAreaVector, RelativePositionType where )
 {
@@ -881,8 +895,8 @@ CTFNavArea *CRaidLogic::SelectMobSpawn( CUtlVector< CTFNavArea * > *spawnAreaVec
 	// return whatever we've found so far
 	return spawnArea;
 }
-
-
+#endif
+#if 0
 //--------------------------------------------------------------------------------------------------------
 void CRaidLogic::SpawnMobs( CUtlVector< CTFNavArea * > *spawnAreaVector )
 {
@@ -1742,7 +1756,7 @@ void CRaidLogic::Update( void )
 	if ( tf_raid_spawn_enable.GetBool() == false )
 		return;
 
-#if 0
+#if 1
 	// populate wanderers
 	CPopulator populator( maxIncursion, tf_raid_max_wanderers.GetInt() - m_wandererCount );
 	SearchSurroundingAreas( m_farthestAlongRaider->GetLastKnownArea(), populator );
@@ -1753,9 +1767,9 @@ void CRaidLogic::Update( void )
 		StartMobTimer( tf_raid_capture_mob_interval.GetFloat() - 0.1f );
 	}
 
-	SpawnMobs( &populator.m_hiddenAreaVector );
-	SpawnSpecials( &populator.m_hiddenAreaAheadVector, &populator.m_hiddenAreaVector );
-	SpawnEngineers();
+	//SpawnMobs( &populator.m_hiddenAreaVector );
+	//SpawnSpecials( &populator.m_hiddenAreaAheadVector, &populator.m_hiddenAreaVector );
+	//SpawnEngineers();
 
 
 	// emit mob
@@ -1775,6 +1789,7 @@ void CRaidLogic::Update( void )
 			}
 		}
 
+#if 0
 		if ( m_mobArea )
 		{
 			if ( SpawnRedTFBot( m_mobClass, m_mobArea->GetCenter() + Vector( 0, 0, StepHeight ), IS_MOB_RUSHER ) )
@@ -1783,6 +1798,7 @@ void CRaidLogic::Update( void )
 				DevMsg( "RAID: %3.2f: Spawned mob member, %d to go\n", gpGlobals->curtime, m_mobCountRemaining );
 			}
 		}
+#endif
 	}
 #endif // 0
 
