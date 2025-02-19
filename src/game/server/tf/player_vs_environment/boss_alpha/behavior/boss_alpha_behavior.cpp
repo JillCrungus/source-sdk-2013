@@ -70,7 +70,7 @@ EventDesiredResult< CBossAlpha > CBossAlphaBehavior::OnKilled( CBossAlpha *me, c
 		// full end-of-game boss
 		UTIL_Remove( me );
 
-		if ( TFGameRules()->IsBossBattleMode() )
+		if ( TFGameRules()->IsBossBattleMode() || TFGameRules()->IsRaidMode() )
 		{
 			// check that ALL bosses are dead
 			bool isBossBattleWon = true;

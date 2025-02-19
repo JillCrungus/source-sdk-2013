@@ -17626,7 +17626,6 @@ bool CTFGameRules::CanPlayerChooseClass( CBasePlayer *pPlayer, int iClass )
 	{
 		return true;
 	}
-	else
 #endif // TF_RAID_MODE
 
 	if ( iClassLimit == NO_CLASS_LIMIT )

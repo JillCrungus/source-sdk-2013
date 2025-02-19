@@ -84,21 +84,21 @@ private:
 	bool Unspawn( CTFPlayer *who );
 	void CullObsoleteEnemies( float minIncursion, float maxIncursion );
 
-//	void SpawnMobs( CUtlVector< CTFNavArea * > *spawnAreaVector );
+	void SpawnMobs( CUtlVector< CTFNavArea * > *spawnAreaVector );
 	CountdownTimer m_mobSpawnTimer;
 	CountdownTimer m_mobLifetimeTimer;
 	CTFNavArea *m_mobArea;
 	int m_mobCountRemaining;
 	int m_mobClass;
 
-//	void SpawnEngineers( void );
+	void SpawnEngineers( void );
 	CountdownTimer m_engineerSpawnTimer;
 
-//	void SpawnSpecials( CUtlVector< CTFNavArea * > *spawnAheadVector, CUtlVector< CTFNavArea * > *spawnAnywhereVector );
+	void SpawnSpecials( CUtlVector< CTFNavArea * > *spawnAheadVector, CUtlVector< CTFNavArea * > *spawnAnywhereVector );
 	CountdownTimer m_specialSpawnTimer;
 
 	CTFNavArea *SelectMobSpawn( CUtlVector< CTFNavArea * > *spawnAreaVector, RelativePositionType where );
-//	bool SpawnSquad( CTFNavArea *spawnArea );
+	bool SpawnSquad( CTFNavArea *spawnArea );
 	void StartMobTimer( float duration );
 
 	bool m_isWaitingForRaidersToLeaveSpawnRoom;

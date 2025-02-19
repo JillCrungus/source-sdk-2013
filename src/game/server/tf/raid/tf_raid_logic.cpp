@@ -229,14 +229,19 @@ void CRaidLogic::Reset( void )
 	m_miniBossIndex = 0;
 }
 
-CTFBot* SpawnRedTFBot(int botClass, const Vector& spot)
+#define IS_MOB_RUSHER true
+CTFBot* SpawnRedTFBot(int botClass, const Vector& spot, bool is_rusher = false)
 {
 	CTFBot* bot = NextBotCreatePlayerBot< CTFBot >("Bot");
 
 	if (!bot)
 		return nullptr;
 
-	//bot->SetAttribute(CTFBot::IS_NPC);
+	bot->SetAttribute(CTFBot::REMOVE_ON_DEATH);
+	if (is_rusher)
+	{
+		bot->SetAttribute(CTFBot::AGGRESSIVE);
+	}
 	bot->HandleCommand_JoinTeam("red");
 	bot->SetDifficulty(CTFBot::NORMAL);
 	bot->HandleCommand_JoinClass(g_aRawPlayerClassNamesShort[botClass]);
@@ -267,6 +272,23 @@ bool SpawnWanderer( const Vector &spot )
 
 	return false;
 */
+}
+
+bool SpawnMinion(const Vector& spot)
+{
+	/*
+	CBaseCombatCharacter* minion = static_cast<CBaseCombatCharacter*>(CreateEntityByName("bot_npc_minion"));
+	if (minion)
+	{
+		minion->SetAbsOrigin(spot);
+		minion->SetOwnerEntity(NULL);
+
+		DispatchSpawn(minion);
+
+		return true;
+	}
+	*/
+	return false;
 }
 #endif // 0
 
@@ -359,6 +381,7 @@ void CRaidLogic::OnRoundStart( void )
 	for( int i=0; i<minionAreaVector.Count(); ++i )
 	{
 		static_cast< CTFNavArea * >( minionAreaVector[i] )->AddToWanderCount( 1 );
+		SpawnMinion(minionAreaVector[i]->GetRandomPoint());
 //		SpawnWanderer( minionAreaVector[i]->GetRandomPoint() );
 	}
 
@@ -749,7 +772,7 @@ CTFNavArea *CRaidLogic::FindSpawnAreaBehind( void )
 }
 
 
-#if 0
+#if 1
 //--------------------------------------------------------------------------------------------------------
 bool CRaidLogic::SpawnSquad( CTFNavArea *spawnArea )
 {
@@ -896,7 +919,7 @@ CTFNavArea *CRaidLogic::SelectMobSpawn( CUtlVector< CTFNavArea * > *spawnAreaVec
 	return spawnArea;
 }
 #endif
-#if 0
+#if 1
 //--------------------------------------------------------------------------------------------------------
 void CRaidLogic::SpawnMobs( CUtlVector< CTFNavArea * > *spawnAreaVector )
 {
@@ -1105,7 +1128,7 @@ CTFNavArea *CRaidLogic::SelectRaidSentryArea( void ) const
 }
 
 
-#if 0
+#if 1
 //--------------------------------------------------------------------------------------------------------
 void CRaidLogic::SpawnEngineers( void )
 {
@@ -1149,8 +1172,8 @@ void CRaidLogic::SpawnEngineers( void )
 		}
 	}
 }
-
-
+#endif
+#if 1
 //--------------------------------------------------------------------------------------------------------
 void CRaidLogic::SpawnSpecials( CUtlVector< CTFNavArea * > *spawnAheadVector, CUtlVector< CTFNavArea * > *spawnAnywhereVector )
 {
@@ -1767,9 +1790,9 @@ void CRaidLogic::Update( void )
 		StartMobTimer( tf_raid_capture_mob_interval.GetFloat() - 0.1f );
 	}
 
-	//SpawnMobs( &populator.m_hiddenAreaVector );
-	//SpawnSpecials( &populator.m_hiddenAreaAheadVector, &populator.m_hiddenAreaVector );
-	//SpawnEngineers();
+	SpawnMobs( &populator.m_hiddenAreaVector );
+	SpawnSpecials( &populator.m_hiddenAreaAheadVector, &populator.m_hiddenAreaVector );
+	SpawnEngineers();
 
 
 	// emit mob
@@ -1789,7 +1812,7 @@ void CRaidLogic::Update( void )
 			}
 		}
 
-#if 0
+#if 1
 		if ( m_mobArea )
 		{
 			if ( SpawnRedTFBot( m_mobClass, m_mobArea->GetCenter() + Vector( 0, 0, StepHeight ), IS_MOB_RUSHER ) )
