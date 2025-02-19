@@ -8,6 +8,7 @@
 #ifdef TF_RAID_MODE
 
 #include "tf_team.h"
+#include "bot/tf_bot.h"
 #include "bot/map_entities/tf_bot_generator.h"
 #include "player_vs_environment/tf_boss_battle_logic.h"
 

@@ -14,7 +14,7 @@
 #include "tf_bot_manager.h"
 #include "tf_bot_vision.h"
 #include "tf_team.h"
-#include "bot/map_entities/tf_bot_generator.h"
+//#include "bot/map_entities/tf_bot_generator.h"
 #include "trigger_area_capture.h"
 #include "GameEventListener.h"
 #include "NextBotUtil.h"
@@ -34,7 +34,7 @@
 #include "player_vs_environment/tf_population_manager.h"
 
 #include "bot/behavior/tf_bot_behavior.h"
-#include "bot/map_entities/tf_bot_generator.h"
+//#include "bot/map_entities/tf_bot_generator.h"
 #include "bot/map_entities/tf_bot_hint_entity.h"
 
 ConVar tf_bot_force_class( "tf_bot_force_class", "", FCVAR_GAMEDLL, "If set to a class name, all TFBots will respawn as that class" );

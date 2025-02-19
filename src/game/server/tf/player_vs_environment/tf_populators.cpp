@@ -17,6 +17,9 @@
 #include "tf_gamerules.h"
 #include "etwprof.h"
 #include "team_control_point_master.h"
+#ifdef TF_RAID_MODE
+#include "Raid/tf_raid_logic.h"
+#endif
 
 extern ConVar tf_populator_debug;
 extern ConVar tf_populator_active_buffer_range;

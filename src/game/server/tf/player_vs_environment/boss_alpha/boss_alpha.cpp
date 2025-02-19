@@ -24,6 +24,7 @@
 #include "nav_mesh/tf_path_follower.h"
 #include "bot_npc/bot_npc_minion.h"
 #include "player_vs_environment/monster_resource.h"
+#include "bot/tf_bot.h"
 #include "bot/map_entities/tf_bot_generator.h"
 
 #include "player_vs_environment/boss_alpha/boss_alpha.h"
@@ -219,7 +220,7 @@ void CBossAlpha::Spawn( void )
 
 	ChangeTeam( TF_TEAM_RED );
 
-	TFGameRules()->SetActiveBoss( this );
+	TFGameRules()->AddActiveBoss( this );
 
 	// CollisionProp()->SetSurroundingBoundsType( USE_HITBOXES );
 
