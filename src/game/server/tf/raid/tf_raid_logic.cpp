@@ -232,6 +232,9 @@ void CRaidLogic::Reset( void )
 #define IS_MOB_RUSHER true
 CTFBot* SpawnRedTFBot(int botClass, const Vector& spot, bool is_rusher = false)
 {
+	if (GetAvailableRedSpawnSlots() <= 0)
+		return nullptr;
+
 	CTFBot* bot = NextBotCreatePlayerBot< CTFBot >("Bot");
 
 	if (!bot)
@@ -244,7 +247,7 @@ CTFBot* SpawnRedTFBot(int botClass, const Vector& spot, bool is_rusher = false)
 	}
 	bot->HandleCommand_JoinTeam("red");
 	bot->SetDifficulty(CTFBot::NORMAL);
-	bot->HandleCommand_JoinClass(g_aRawPlayerClassNamesShort[botClass]);
+	bot->HandleCommand_JoinClass(g_aRawPlayerClassNames[botClass]);
 	bot->SetPosition(spot);
 	return bot;
 }
