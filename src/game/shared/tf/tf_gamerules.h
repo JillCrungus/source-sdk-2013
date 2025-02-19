@@ -90,6 +90,10 @@ extern ConVar tf_gamemode_boss_battle;
 
 #endif // TF_RAID_MODE
 
+#ifdef TF_CREEP_MODE
+extern ConVar tf_gamemode_creep_wave;
+#endif
+
 class CMannVsMachineLogic;
 class CMannVsMachineUpgrades;
 
