@@ -97,9 +97,9 @@ ActionResult< CTFBot >	CTFBotWander::Update( CTFBot *me, float interval )
 		m_vocalizeTimer.Start( RandomFloat( tf_raid_wanderer_vocalize_min_interval.GetFloat(), tf_raid_wanderer_vocalize_max_interval.GetFloat() ) );
 
 		// mouth off
-		if ( me->IsPlayerClass( TF_CLASS_SCOUT ) )
-			me->EmitSound( "Scout.WanderJabber" );
-		else
+		//if ( me->IsPlayerClass( TF_CLASS_SCOUT ) )
+		//	me->EmitSound( "Scout.WanderJabber" );
+		//else
 			me->SpeakConceptIfAllowed( MP_CONCEPT_PLAYER_JEERS );
 	}
 
