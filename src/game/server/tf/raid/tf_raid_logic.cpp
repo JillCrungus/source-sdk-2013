@@ -1274,8 +1274,6 @@ void CRaidLogic::SpawnSpecials( CUtlVector< CTFNavArea * > *spawnAheadVector, CU
 //--------------------------------------------------------------------------------------------------------
 void CRaidLogic::CullObsoleteEnemies( float minIncursion, float maxIncursion )
 {
-return;
-
 	// cull wanderers outside of the active area set - use slightly larger range to avoid thrashing
 	CTeam *defenseTeam = GetGlobalTeam( TF_TEAM_RED );
 
