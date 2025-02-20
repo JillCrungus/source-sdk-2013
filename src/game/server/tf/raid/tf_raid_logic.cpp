@@ -17,6 +17,7 @@
 #include "bot_npc/bot_npc_minion.h"
 #include "tf_obj_sentrygun.h"
 #include "filesystem.h"
+#include "player_vs_environment/tf_populators.h"
 
 #include "func_respawnroom.h"
 #include "pathtrack.h"
@@ -54,7 +55,7 @@ ConVar tf_raid_sentry_density( "tf_raid_sentry_density", "0.0000005", 0/*FCVAR_C
 ConVar tf_raid_sentry_spacing( "tf_raid_sentry_spacing", "750", 0/*FCVAR_CHEAT*/, "Minimum travel distance between sentry gun spots" );
 ConVar tf_raid_debug_sentry_placement( "tf_raid_debug_sentry_placement", "0"/*, FCVAR_CHEAT*/ );
 ConVar tf_raid_spawn_sentries( "tf_raid_spawn_sentries", "1"/*, FCVAR_CHEAT*/ );
-ConVar tf_raid_spawn_engineers( "tf_raid_spawn_engineers", "0"/*, FCVAR_CHEAT*/ );
+ConVar tf_raid_spawn_engineers( "tf_raid_spawn_engineers", "1"/*, FCVAR_CHEAT*/ );
 ConVar tf_raid_engineer_spawn_interval( "tf_raid_engineer_spawn_interval", "20"/*, FCVAR_CHEAT*/ );
 
 ConVar tf_raid_mob_spawn_min_interval( "tf_raid_mob_spawn_min_interval", "60"/*, FCVAR_CHEAT*/ );
@@ -74,7 +75,7 @@ ConVar tf_raid_capture_mob_interval( "tf_raid_capture_mob_interval", "20"/*, FCV
 
 ConVar tf_raid_special_spawn_min_interval( "tf_raid_special_spawn_min_interval", "20"/*, FCVAR_CHEAT*/ );
 ConVar tf_raid_special_spawn_max_interval( "tf_raid_special_spawn_max_interval", "30"/*, FCVAR_CHEAT*/ );
-ConVar tf_raid_spawn_specials( "tf_raid_spawn_specials", "0"/*, FCVAR_CHEAT*/ );
+ConVar tf_raid_spawn_specials( "tf_raid_spawn_specials", "1"/*, FCVAR_CHEAT*/ );
 
 ConVar tf_raid_sniper_spawn_ahead_incursion( "tf_raid_sniper_spawn_ahead_incursion", "6000"/*, FCVAR_CHEAT*/ );
 ConVar tf_raid_sniper_spawn_behind_incursion( "tf_raid_sniper_spawn_behind_incursion", "6000"/*, FCVAR_CHEAT*/ );
@@ -230,25 +231,108 @@ void CRaidLogic::Reset( void )
 }
 
 #define IS_MOB_RUSHER true
-CTFBot* SpawnRedTFBot(int botClass, const Vector& spot, bool is_rusher = false)
+CTFBot* SpawnRedTFBot(int botClass, const Vector& rawSpot, bool is_rusher = false)
 {
 	if (GetAvailableRedSpawnSlots() <= 0)
 		return nullptr;
 
-	CTFBot* bot = NextBotCreatePlayerBot< CTFBot >("Bot");
+	CTFBot* bot = nullptr;
+	Vector spot = rawSpot;
 
-	if (!bot)
+	//Lots of this scraped from tf_populator_spawners
+	CTFNavArea* area = (CTFNavArea*)TheTFNavMesh()->GetNavArea(spot);
+	if (area && area->HasAttributeTF(TF_NAV_SPAWN_ROOM_BLUE))
+	{
+		if (tf_raid_debug.GetBool())
+		{
+			DevMsg("RAID: Tried to spawn bot in blue spawn room\n");
+			NDebugOverlay::Box(spot, Vector(-16, -16, 0), Vector(16, 16, 64), 0, 255, 0, 0, 5.0f);
+		}
+		return nullptr;
+	}
+
+	if (TFGameRules()->State_Get() != GR_STATE_RND_RUNNING)
 		return nullptr;
 
-	bot->SetAttribute(CTFBot::REMOVE_ON_DEATH);
+	float z;
+	for (z = 0.0f; z < StepHeight; z += 4.0f)
+	{
+		spot.z = rawSpot.z + StepHeight;
+
+		if (IsSpaceToSpawnHere(spot))
+		{
+			break;
+		}
+	}
+
+	if (z >= StepHeight)
+	{
+		if (tf_raid_debug.GetBool())
+		{
+			DevMsg("RAID: No space to spawn bot\n");
+			NDebugOverlay::Box(spot, Vector(-16, -16, 0), Vector(16, 16, 64), 255, 0, 0, 0, 5.0f);
+		}
+		return nullptr;
+	}
+
+	//Recycle spectators
+	CTeam* deadTeam = GetGlobalTeam(TEAM_SPECTATOR);
+	for (int i = 0; i < deadTeam->GetNumPlayers(); ++i)
+	{
+		if (!deadTeam->GetPlayer(i)->IsBot())
+			continue;
+
+		// reuse this guy
+		bot = (CTFBot*)deadTeam->GetPlayer(i);
+		bot->ClearAllAttributes();
+		break;
+	}
+
+	if (!bot)
+	{
+		if (tf_raid_debug.GetBool())
+		{
+			DevMsg("RAID: No dead bots to recycle, spawning a new one\n");
+		}
+		bot = NextBotCreatePlayerBot< CTFBot >("Defender");
+
+		if (!bot)
+		{
+			if (tf_raid_debug.GetBool())
+			{
+				DevMsg("RAID: Failed to spawn new bot!\n");
+			}
+			return nullptr;
+		}
+	}
+
+	bot->RemovePlayerAttributes(false);
+	bot->ClearTeleportWhere();
+
+	engine->SetFakeClientConVarValue(bot->edict(), "name", "Defender");
+
+	if (g_internalSpawnPoint == nullptr)
+	{
+		g_internalSpawnPoint = (CPopulatorInternalSpawnPoint*)CreateEntityByName("populator_internal_spawn_point");
+		g_internalSpawnPoint->Spawn();
+	}
+
+	g_internalSpawnPoint->SetAbsOrigin(spot);
+	g_internalSpawnPoint->SetLocalAngles(vec3_angle);
+	bot->SetSpawnPoint(g_internalSpawnPoint);
+
+	bot->ChangeTeam(TF_TEAM_RED, false, true);
+
+	bot->AllowInstantSpawn();
+
+	bot->HandleCommand_JoinClass(g_aRawPlayerClassNames[botClass]);
+
+	bot->SetAttribute(CTFBot::BECOME_SPECTATOR_ON_DEATH);
 	if (is_rusher)
 	{
 		bot->SetAttribute(CTFBot::AGGRESSIVE);
 	}
-	bot->HandleCommand_JoinTeam("red");
 	bot->SetDifficulty(CTFBot::NORMAL);
-	bot->HandleCommand_JoinClass(g_aRawPlayerClassNames[botClass]);
-	bot->SetPosition(spot);
 	return bot;
 }
 
@@ -434,6 +518,12 @@ void CRaidLogic::OnRoundStart( void )
 		{
 			CTFNavArea *homeArea = defenderAreaVector[i];
 
+			if (tf_raid_debug.GetBool())
+			{
+				homeArea->DrawFilled(0, 255, 0, 100, 1.0f);
+				DevMsg("RAID: Defender home area at %3.2f, %3.2f\n", homeArea->GetCenter().x, homeArea->GetCenter().y);
+			}
+
 			CTFBot *bot = SpawnRedTFBot( classRoster[ i % classRosterCount ], homeArea->GetCenter() + Vector( 0, 0, 10.0f ) );
 			if ( bot )
 			{
@@ -442,6 +532,7 @@ void CRaidLogic::OnRoundStart( void )
 			else
 			{
 				DevMsg( "RAID: Failed to spawn defender!\n" );
+				NDebugOverlay::Box(homeArea->GetCenter(), Vector(-16, -16, 0), Vector(16, 16, 64), 255, 0, 0, 0, 5.0f);
 			}
 		}
 
